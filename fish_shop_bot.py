@@ -301,11 +301,6 @@ def handle_menu(update: Update, context: CallbackContext):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    context.bot.delete_message(
-        chat_id=query.message.chat.id,
-        message_id=query.message.message_id,
-    )
-
     with open(picture_file_path, 'rb') as photo:
         context.bot.send_photo(
             caption=message,
@@ -313,7 +308,14 @@ def handle_menu(update: Update, context: CallbackContext):
             photo=photo,
             reply_markup=reply_markup,
         )
+
+    context.bot.delete_message(
+        chat_id=query.message.chat.id,
+        message_id=query.message.message_id,
+    )
+
     os.remove(picture_file_path)
+
     return "HANDLE_DESCRIPTION"
 
 
