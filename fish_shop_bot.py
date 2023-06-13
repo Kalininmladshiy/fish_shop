@@ -435,7 +435,14 @@ def handle_waiting_email(update: Update, context: CallbackContext):
         chat_id=message.chat.id,
         text=f'Вы прислали: {customer_email}',
     )
-    create_a_customer(customer_name, customer_email)
+    try:
+        create_a_customer(customer_name, customer_email)
+    except requests.exceptions.HTTPError as err:
+        if '422 Client Error' in str(err):
+            context.bot.send_message(
+                chat_id=message.chat.id,
+                text='Проверьте email',
+            )
 
     return "WAITING_EMAIL"
 
@@ -468,12 +475,6 @@ def handle_users_reply(update: Update, context: CallbackContext):
     try:
         next_state = state_handler(update, context)
         db.set(chat_id, next_state)
-    except requests.exceptions.HTTPError as err:
-        if '422 Client Error' in str(err):
-            context.bot.send_message(
-                chat_id=message.chat.id,
-                text=f'Проверьте email',
-            )
     except Exception as err:
         print(err)
 
