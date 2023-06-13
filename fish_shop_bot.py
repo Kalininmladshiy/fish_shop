@@ -18,8 +18,7 @@ _database = None
 
 
 def get_database_connection():
-    env = Env()
-    env.read_env()
+
     global _database
     if _database is None:
         host = env.str('ALLOWED_HOSTS', 'localhost')
@@ -31,8 +30,7 @@ def get_database_connection():
 
 
 def create_a_customer(name, email):
-    env = Env()
-    env.read_env()
+
     access_token = env.str('ACCESS_TOKEN')
     create_a_customer_url = f'https://useast.api.elasticpath.com/v2/customers'
     headers_create_a_customer = {
@@ -55,8 +53,7 @@ def create_a_customer(name, email):
 
 
 def add_to_cart(quantity, product_id, cart_id):
-    env = Env()
-    env.read_env()
+
     access_token = env.str('ACCESS_TOKEN')
     add_to_cart_url = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items'
     headers_add_to_cart = {
@@ -79,8 +76,7 @@ def add_to_cart(quantity, product_id, cart_id):
 
 
 def delete_from_cart(product_id, cart_id):
-    env = Env()
-    env.read_env()
+
     access_token = env.str('ACCESS_TOKEN')
     delete_from_cart_url = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items/{product_id}'
     headers_delete_from_cart = {
@@ -95,8 +91,7 @@ def delete_from_cart(product_id, cart_id):
 
 
 def get_cart(cart_id):
-    env = Env()
-    env.read_env()
+
     access_token = env.str('ACCESS_TOKEN')
     get_cart_url = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items'
     headers_get_cart = {
@@ -131,8 +126,7 @@ def get_cart_message(cart):
 
 
 def get_products():
-    env = Env()
-    env.read_env()
+
     access_token = env.str('ACCESS_TOKEN')
     get_products_url = 'https://useast.api.elasticpath.com/pcm/products'
     headers_get_products = {
@@ -151,8 +145,7 @@ def get_products():
 
 
 def get_product(product_id):
-    env = Env()
-    env.read_env()
+
     access_token = env.str('ACCESS_TOKEN')
     get_product_url = f'https://useast.api.elasticpath.com/pcm/products/{product_id}'
     headers_get_product = {
@@ -171,8 +164,7 @@ def get_product(product_id):
 
 
 def get_price(sku):
-    env = Env()
-    env.read_env()
+
     access_token = env.str('ACCESS_TOKEN')
     price_book_id = env.str('PRICE_BOOK_ID')
     get_prices_url = f'https://useast.api.elasticpath.com/pcm/pricebooks/{price_book_id}/prices'
@@ -194,8 +186,7 @@ def get_price(sku):
 
 
 def get_product_photo_link(photo_id):
-    env = Env()
-    env.read_env()
+
     access_token = env.str('ACCESS_TOKEN')
     get_product_photo_url = f'https://useast.api.elasticpath.com/v2/files/{photo_id}'
     headers_get_product_photo = {
@@ -486,8 +477,6 @@ def handle_users_reply(update: Update, context: CallbackContext):
 
 
 def main():
-    env = Env()
-    env.read_env()
 
     tg_token = env.str('TG_BOT_TOKEN')
     updater = Updater(tg_token)
@@ -500,4 +489,6 @@ def main():
 
 
 if __name__ == '__main__':
+    env = Env()
+    env.read_env()
     main()
