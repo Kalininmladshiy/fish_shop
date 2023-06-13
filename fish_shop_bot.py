@@ -32,79 +32,79 @@ def get_database_connection():
 def create_a_customer(name, email):
 
     access_token = env.str('ACCESS_TOKEN')
-    create_a_customer_url = f'https://useast.api.elasticpath.com/v2/customers'
-    headers_create_a_customer = {
+    create_customer = f'https://useast.api.elasticpath.com/v2/customers'
+    headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
     }
-    payload_create_a_customer = {
+    payload = {
         "data": {
             "type": 'customer',
             "name": name,
             "email": email,
         }
     }
-    response_create_a_customer = requests.post(
-        create_a_customer_url,
-        headers=headers_create_a_customer,
-        json=payload_create_a_customer,
+    response = requests.post(
+        create_customer,
+        headers=headers,
+        json=payload,
     )
-    response_create_a_customer.raise_for_status()
+    response.raise_for_status()
 
 
 def add_to_cart(quantity, product_id, cart_id):
 
     access_token = env.str('ACCESS_TOKEN')
-    add_to_cart_url = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items'
-    headers_add_to_cart = {
+    add_to_cart = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items'
+    headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
     }
-    payload_add_to_cart = {
+    payload = {
         "data": {
             "id": product_id,
             "type": "cart_item",
             "quantity": quantity,
         }
     }
-    response_add_to_cart = requests.post(
-        add_to_cart_url,
-        headers=headers_add_to_cart,
-        json=payload_add_to_cart,
+    response = requests.post(
+        add_to_cart,
+        headers=headers,
+        json=payload,
     )
-    response_add_to_cart.raise_for_status()
+    response.raise_for_status()
 
 
 def delete_from_cart(product_id, cart_id):
 
     access_token = env.str('ACCESS_TOKEN')
-    delete_from_cart_url = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items/{product_id}'
-    headers_delete_from_cart = {
+    delete_from_cart = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items/{product_id}'
+    headers = {
         "Authorization": f"Bearer {access_token}",
     }
 
-    response_delete_from_cart = requests.delete(
-        delete_from_cart_url,
-        headers=headers_delete_from_cart,
+    response = requests.delete(
+        delete_from_cart,
+        headers=headers,
     )
-    response_delete_from_cart.raise_for_status()
+    response.raise_for_status()
 
 
 def get_cart(cart_id):
 
     access_token = env.str('ACCESS_TOKEN')
-    get_cart_url = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items'
-    headers_get_cart = {
+    get_cart = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items'
+    headers = {
         "Authorization": f"Bearer {access_token}",
     }
-    payload_get_cart = {}
-    response_get_cart = requests.get(
-        get_cart_url,
-        headers=headers_get_cart,
-        data=payload_get_cart,
+    payload = {}
+    response = requests.get(
+        get_cart,
+        headers=headers,
+        data=payload,
     )
-    response_get_cart.raise_for_status()
-    cart = response_get_cart.json()
+    response.raise_for_status()
+    cart = response.json()
 
     return cart
 
@@ -128,18 +128,18 @@ def get_cart_message(cart):
 def get_products():
 
     access_token = env.str('ACCESS_TOKEN')
-    get_products_url = 'https://useast.api.elasticpath.com/pcm/products'
-    headers_get_products = {
+    get_products = 'https://useast.api.elasticpath.com/pcm/products'
+    headers = {
         "Authorization": f"Bearer {access_token}",
     }
-    payload_get_products = {}
-    response_get_products = requests.get(
-        get_products_url,
-        headers=headers_get_products,
-        data=payload_get_products,
+    payload = {}
+    response = requests.get(
+        get_products,
+        headers=headers,
+        data=payload,
     )
-    response_get_products.raise_for_status()
-    products = response_get_products.json()['data']
+    response.raise_for_status()
+    products = response.json()['data']
 
     return products
 
@@ -147,18 +147,18 @@ def get_products():
 def get_product(product_id):
 
     access_token = env.str('ACCESS_TOKEN')
-    get_product_url = f'https://useast.api.elasticpath.com/pcm/products/{product_id}'
-    headers_get_product = {
+    get_product = f'https://useast.api.elasticpath.com/pcm/products/{product_id}'
+    headers = {
         "Authorization": f"Bearer {access_token}",
     }
-    payload_get_product = {}
-    response_get_product = requests.get(
-        get_product_url,
-        headers=headers_get_product,
-        data=payload_get_product,
+    payload = {}
+    response = requests.get(
+        get_product,
+        headers=headers,
+        data=payload,
     )
-    response_get_product.raise_for_status()
-    product = response_get_product.json()['data']
+    response.raise_for_status()
+    product = response.json()['data']
 
     return product
 
@@ -167,18 +167,18 @@ def get_price(sku):
 
     access_token = env.str('ACCESS_TOKEN')
     price_book_id = env.str('PRICE_BOOK_ID')
-    get_prices_url = f'https://useast.api.elasticpath.com/pcm/pricebooks/{price_book_id}/prices'
-    headers_get_prices = {
+    get_prices = f'https://useast.api.elasticpath.com/pcm/pricebooks/{price_book_id}/prices'
+    headers = {
         "Authorization": f"Bearer {access_token}",
     }
-    payload_get_prices = {}
-    response_get_prices = requests.get(
-        get_prices_url,
-        headers=headers_get_prices,
-        data=payload_get_prices,
+    payload = {}
+    response = requests.get(
+        get_prices,
+        headers=headers,
+        data=payload,
     )
-    response_get_prices.raise_for_status()
-    prices = response_get_prices.json()['data']
+    response.raise_for_status()
+    prices = response.json()['data']
     for price in prices:
         if price['attributes']['sku'] == sku:
             return price['attributes']['currencies']['USD']['amount'] / 100
@@ -188,18 +188,18 @@ def get_price(sku):
 def get_product_photo_link(photo_id):
 
     access_token = env.str('ACCESS_TOKEN')
-    get_product_photo_url = f'https://useast.api.elasticpath.com/v2/files/{photo_id}'
-    headers_get_product_photo = {
+    get_product_photo = f'https://useast.api.elasticpath.com/v2/files/{photo_id}'
+    headers = {
         "Authorization": f"Bearer {access_token}",
     }
-    payload_get_product_photo = {}
-    response_get_product_photo = requests.get(
-        get_product_photo_url,
-        headers=headers_get_product_photo,
-        data=payload_get_product_photo,
+    payload = {}
+    response = requests.get(
+        get_product_photo,
+        headers=headers,
+        data=payload,
     )
-    response_get_product_photo.raise_for_status()
-    return response_get_product_photo.json()['data']['link']['href']
+    response.raise_for_status()
+    return response.json()['data']['link']['href']
 
 
 def get_keyboard_main_menu():
