@@ -4,6 +4,8 @@ import redis
 import os
 from pathlib import Path
 
+from utils import download_pictures
+
 from environs import Env
 
 from telegram import Update
@@ -26,14 +28,6 @@ def get_database_connection():
         db = env.str('DB', '0')
         _database = redis.Redis(host=host, port=port, db=db, decode_responses=decode_responses)
     return _database
-
-
-def download_pictures(filename, url):
-    path_to_pictures = Path.cwd()
-    response = requests.get(url)
-    response.raise_for_status()
-    with open(Path() / path_to_pictures / filename, 'wb') as file:
-        file.write(response.content)
 
 
 def create_a_customer(name, email):
