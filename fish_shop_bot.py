@@ -29,10 +29,29 @@ def get_database_connection():
     return _database
 
 
+def get_access_token():
+    client_id = env.str('CLIENT_ID')
+    client_secret = env.str('CLIENT_SECRET')
+    new_access_token = 'https://useast.api.elasticpath.com/oauth/access_token'
+    payload = {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "grant_type": "client_credentials",
+    }
+
+    response = requests.get(
+        new_access_token,
+        data=payload,
+    )
+    response.raise_for_status()
+    access_token = response.json()['access_token']
+    return access_token
+
+
 def create_a_customer(name, email):
 
-    access_token = env.str('ACCESS_TOKEN')
-    create_customer = f'https://useast.api.elasticpath.com/v2/customers'
+    access_token = get_access_token()
+    create_customer = 'https://useast.api.elasticpath.com/v2/customers'
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
@@ -54,7 +73,7 @@ def create_a_customer(name, email):
 
 def add_to_cart(quantity, product_id, cart_id):
 
-    access_token = env.str('ACCESS_TOKEN')
+    access_token = get_access_token()
     add_to_cart = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -77,7 +96,7 @@ def add_to_cart(quantity, product_id, cart_id):
 
 def delete_from_cart(product_id, cart_id):
 
-    access_token = env.str('ACCESS_TOKEN')
+    access_token = get_access_token()
     delete_from_cart = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items/{product_id}'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -92,7 +111,7 @@ def delete_from_cart(product_id, cart_id):
 
 def get_cart(cart_id):
 
-    access_token = env.str('ACCESS_TOKEN')
+    access_token = get_access_token()
     get_cart = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -127,7 +146,7 @@ def get_cart_message(cart):
 
 def get_products():
 
-    access_token = env.str('ACCESS_TOKEN')
+    access_token = get_access_token()
     get_products = 'https://useast.api.elasticpath.com/pcm/products'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -146,7 +165,7 @@ def get_products():
 
 def get_product(product_id):
 
-    access_token = env.str('ACCESS_TOKEN')
+    access_token = get_access_token()
     get_product = f'https://useast.api.elasticpath.com/pcm/products/{product_id}'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -165,7 +184,7 @@ def get_product(product_id):
 
 def get_price(sku):
 
-    access_token = env.str('ACCESS_TOKEN')
+    access_token = get_access_token()
     price_book_id = env.str('PRICE_BOOK_ID')
     get_prices = f'https://useast.api.elasticpath.com/pcm/pricebooks/{price_book_id}/prices'
     headers = {
@@ -187,7 +206,7 @@ def get_price(sku):
 
 def get_product_photo_link(photo_id):
 
-    access_token = env.str('ACCESS_TOKEN')
+    access_token = get_access_token()
     get_product_photo = f'https://useast.api.elasticpath.com/v2/files/{photo_id}'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -392,11 +411,6 @@ def handle_cart(update: Update, context: CallbackContext):
 
     delete_from_cart(product_id, cart_id)
 
-    context.bot.delete_message(
-        chat_id=query.message.chat.id,
-        message_id=query.message.message_id,
-    )
-
     cart = get_cart(cart_id)
     message = get_cart_message(cart)
 
@@ -424,6 +438,12 @@ def handle_cart(update: Update, context: CallbackContext):
         text=message,
         reply_markup=reply_markup,
     )
+
+    context.bot.delete_message(
+        chat_id=query.message.chat.id,
+        message_id=query.message.message_id,
+    )
+
     return "HANDLE_CART"
 
 
@@ -448,7 +468,7 @@ def handle_waiting_email(update: Update, context: CallbackContext):
 
 
 def handle_users_reply(update: Update, context: CallbackContext):
-    message = update.message
+
     db = get_database_connection()
     if update.message:
         user_reply = update.message.text
