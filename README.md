@@ -11,7 +11,8 @@ touch .env
 ```
 В проекте используются следующие переменные окружения:  
 `TG_BOT_TOKEN` - Телеграм токен. Его вы получите при регистрации бота  
-`ACCESS_TOKEN` - Токен CMS системы. Как его получить можно почитать по [ссылке](https://elasticpath.dev/docs/commerce-cloud/api-overview/your-first-api-request)  
+`CLIENT_ID` - ID клиента. Его вы можете получить в разделе Application Keys основного меню сервиса CMS  
+`CLIENT_SECRET` - Секретный ключ клиента. Его вы можете получить в разделе Application Keys основного меню сервиса CMS нажав кнопку Create new  
 `PRICE_BOOK_ID` - ID вашего прайс-листа. Его вы можете найти в меню CMS  
 `ALLOWED_HOSTS` - Хост для Redis  
 `DECODE_RESPONSES` - Установите значение True для Redis, если вы хотите получать декодированные строки, а не байты  
