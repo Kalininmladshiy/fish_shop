@@ -18,6 +18,8 @@ from telegram.ext import Filters, Updater
 from telegram.ext import CallbackQueryHandler, CommandHandler, MessageHandler
 
 _database = None
+env = Env()
+env.read_env()
 
 
 def get_database_connection():
@@ -336,9 +338,3 @@ def main():
     dispatcher.add_handler(CommandHandler('start', handle_users_reply))
     updater.start_polling()
     updater.idle()
-
-
-if __name__ == '__main__':
-    env = Env()
-    env.read_env()
-    main()
