@@ -1,8 +1,16 @@
 import requests
 from environs import Env
+from threading import Timer
+
+env = Env()
+env.read_env()
+access_token = None
 
 
 def get_access_token():
+
+    global access_token
+
     client_id = env.str('CLIENT_ID')
     client_secret = env.str('CLIENT_SECRET')
     new_access_token = 'https://useast.api.elasticpath.com/oauth/access_token'
@@ -18,12 +26,12 @@ def get_access_token():
     )
     response.raise_for_status()
     access_token = response.json()['access_token']
-    return access_token
+    Timer(3000, get_access_token).start()
 
 
 def create_a_customer(name, email):
+    global access_token
 
-    access_token = get_access_token()
     create_customer = 'https://useast.api.elasticpath.com/v2/customers'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -45,8 +53,8 @@ def create_a_customer(name, email):
 
 
 def add_to_cart(quantity, product_id, cart_id):
+    global access_token
 
-    access_token = get_access_token()
     add_to_cart = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -68,8 +76,8 @@ def add_to_cart(quantity, product_id, cart_id):
 
 
 def delete_from_cart(product_id, cart_id):
+    global access_token
 
-    access_token = get_access_token()
     delete_from_cart = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items/{product_id}'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -83,8 +91,8 @@ def delete_from_cart(product_id, cart_id):
 
 
 def get_cart(cart_id):
+    global access_token
 
-    access_token = get_access_token()
     get_cart = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -102,8 +110,8 @@ def get_cart(cart_id):
 
 
 def get_products():
+    global access_token
 
-    access_token = get_access_token()
     get_products = 'https://useast.api.elasticpath.com/pcm/products'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -121,8 +129,8 @@ def get_products():
 
 
 def get_product(product_id):
+    global access_token
 
-    access_token = get_access_token()
     get_product = f'https://useast.api.elasticpath.com/pcm/products/{product_id}'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -140,8 +148,8 @@ def get_product(product_id):
 
 
 def get_price(sku):
+    global access_token
 
-    access_token = get_access_token()
     price_book_id = env.str('PRICE_BOOK_ID')
     get_prices = f'https://useast.api.elasticpath.com/pcm/pricebooks/{price_book_id}/prices'
     headers = {
@@ -162,8 +170,8 @@ def get_price(sku):
 
 
 def get_product_photo_link(photo_id):
+    global access_token
 
-    access_token = get_access_token()
     get_product_photo = f'https://useast.api.elasticpath.com/v2/files/{photo_id}'
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -176,8 +184,3 @@ def get_product_photo_link(photo_id):
     )
     response.raise_for_status()
     return response.json()['data']['link']['href']
-
-
-if __name__ == '__main__':
-    env = Env()
-    env.read_env()

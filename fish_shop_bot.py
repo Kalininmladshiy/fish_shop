@@ -8,7 +8,6 @@ from utils import download_pictures
 from requests_to_CMS import get_access_token, create_a_customer, add_to_cart, delete_from_cart
 from requests_to_CMS import get_cart, get_products, get_product, get_price, get_product_photo_link
 
-
 from environs import Env
 
 from telegram import Update
@@ -16,10 +15,6 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 from telegram.ext import Filters, Updater
 from telegram.ext import CallbackQueryHandler, CommandHandler, MessageHandler
-
-_database = None
-env = Env()
-env.read_env()
 
 
 def get_database_connection():
@@ -328,8 +323,11 @@ def handle_users_reply(update: Update, context: CallbackContext):
         print(err)
 
 
-def main():
-
+if __name__ == '__main__':
+    _database = None
+    get_access_token()
+    env = Env()
+    env.read_env()
     tg_token = env.str('TG_BOT_TOKEN')
     updater = Updater(tg_token)
     dispatcher = updater.dispatcher
