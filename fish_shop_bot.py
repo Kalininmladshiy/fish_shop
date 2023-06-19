@@ -114,7 +114,7 @@ def handle_menu(update: Update, context: CallbackContext):
     product_name = product['attributes']['name']
     photo_id = product['relationships']['main_image']['data']['id']
     photo_link = get_product_photo_link(photo_id)
-    price = get_price(product['attributes']['sku'])
+    price = get_price(product['attributes']['sku'], price_book_id)
 
     download_pictures(product_name, photo_link)
     picture_file_path = Path.cwd() / product_name
@@ -325,10 +325,17 @@ def handle_users_reply(update: Update, context: CallbackContext):
 
 if __name__ == '__main__':
     _database = None
-    get_access_token()
+
     env = Env()
     env.read_env()
+
     tg_token = env.str('TG_BOT_TOKEN')
+    client_id = env.str('CLIENT_ID')
+    client_secret = env.str('CLIENT_SECRET')
+    price_book_id = env.str('PRICE_BOOK_ID')
+
+    get_access_token(client_id, client_secret)
+
     updater = Updater(tg_token)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CallbackQueryHandler(handle_users_reply))

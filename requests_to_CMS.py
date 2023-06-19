@@ -1,18 +1,13 @@
 import requests
-from environs import Env
 from threading import Timer
 
-env = Env()
-env.read_env()
 access_token = None
 
 
-def get_access_token():
+def get_access_token(client_id, client_secret):
 
     global access_token
 
-    client_id = env.str('CLIENT_ID')
-    client_secret = env.str('CLIENT_SECRET')
     new_access_token = 'https://useast.api.elasticpath.com/oauth/access_token'
     payload = {
         "client_id": client_id,
@@ -141,9 +136,8 @@ def get_product(product_id):
     return product
 
 
-def get_price(sku):
+def get_price(sku, price_book_id):
 
-    price_book_id = env.str('PRICE_BOOK_ID')
     get_prices = f'https://useast.api.elasticpath.com/pcm/pricebooks/{price_book_id}/prices'
     headers = {
         "Authorization": f"Bearer {access_token}",
