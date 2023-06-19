@@ -30,7 +30,6 @@ def get_access_token():
 
 
 def create_a_customer(name, email):
-    global access_token
 
     create_customer = 'https://useast.api.elasticpath.com/v2/customers'
     headers = {
@@ -53,7 +52,6 @@ def create_a_customer(name, email):
 
 
 def add_to_cart(quantity, product_id, cart_id):
-    global access_token
 
     add_to_cart = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items'
     headers = {
@@ -76,7 +74,6 @@ def add_to_cart(quantity, product_id, cart_id):
 
 
 def delete_from_cart(product_id, cart_id):
-    global access_token
 
     delete_from_cart = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items/{product_id}'
     headers = {
@@ -91,7 +88,6 @@ def delete_from_cart(product_id, cart_id):
 
 
 def get_cart(cart_id):
-    global access_token
 
     get_cart = f'https://useast.api.elasticpath.com/v2/carts/{cart_id}/items'
     headers = {
@@ -110,7 +106,6 @@ def get_cart(cart_id):
 
 
 def get_products():
-    global access_token
 
     get_products = 'https://useast.api.elasticpath.com/pcm/products'
     headers = {
@@ -129,7 +124,6 @@ def get_products():
 
 
 def get_product(product_id):
-    global access_token
 
     get_product = f'https://useast.api.elasticpath.com/pcm/products/{product_id}'
     headers = {
@@ -148,7 +142,6 @@ def get_product(product_id):
 
 
 def get_price(sku):
-    global access_token
 
     price_book_id = env.str('PRICE_BOOK_ID')
     get_prices = f'https://useast.api.elasticpath.com/pcm/pricebooks/{price_book_id}/prices'
@@ -170,7 +163,6 @@ def get_price(sku):
 
 
 def get_product_photo_link(photo_id):
-    global access_token
 
     get_product_photo = f'https://useast.api.elasticpath.com/v2/files/{photo_id}'
     headers = {
