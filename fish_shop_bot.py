@@ -2,6 +2,7 @@ import requests
 import redis
 
 import os
+import time
 from pathlib import Path
 
 from utils import download_pictures
@@ -18,6 +19,8 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, MessageHandler
 
 
 def get_database_connection():
+    env = Env()
+    env.read_env()
 
     global _database
     if _database is None:
@@ -45,8 +48,8 @@ def get_cart_message(cart):
     return message
 
 
-def get_keyboard_main_menu():
-    products = get_products()
+def get_keyboard_main_menu(access_token):
+    products = get_products(access_token)
 
     keyboard = []
     for product in products:
@@ -64,9 +67,11 @@ def get_keyboard_main_menu():
     return reply_markup
 
 
-def start(update: Update, context: CallbackContext):
+def start(update: Update, context: CallbackContext, **kwargs):
 
-    reply_markup = get_keyboard_main_menu()
+    access_token = kwargs['access_token']
+
+    reply_markup = get_keyboard_main_menu(access_token)
 
     context.bot.send_message(
         chat_id=update.message.chat.id,
@@ -76,11 +81,15 @@ def start(update: Update, context: CallbackContext):
     return "HANDLE_MENU"
 
 
-def handle_menu(update: Update, context: CallbackContext):
+def handle_menu(update: Update, context: CallbackContext, **kwargs):
+
+    access_token = kwargs['access_token']
+    price_book_id = kwargs['price_book_id']
+
     query = update.callback_query
     if query.data == 'корзина':
         cart_id = query.message.chat_id
-        cart = get_cart(cart_id)
+        cart = get_cart(cart_id, access_token)
         message = get_cart_message(cart)
 
         keyboard = []
@@ -110,11 +119,11 @@ def handle_menu(update: Update, context: CallbackContext):
         return "HANDLE_CART"
 
     product_id = query.data
-    product = get_product(product_id)
+    product = get_product(product_id, access_token)
     product_name = product['attributes']['name']
     photo_id = product['relationships']['main_image']['data']['id']
-    photo_link = get_product_photo_link(photo_id)
-    price = get_price(product['attributes']['sku'], price_book_id)
+    photo_link = get_product_photo_link(photo_id, access_token)
+    price = get_price(product['attributes']['sku'], price_book_id, access_token)
 
     download_pictures(product_name, photo_link)
     picture_file_path = Path.cwd() / product_name
@@ -162,12 +171,15 @@ def handle_menu(update: Update, context: CallbackContext):
     return "HANDLE_DESCRIPTION"
 
 
-def handle_description(update: Update, context: CallbackContext):
+def handle_description(update: Update, context: CallbackContext, **kwargs):
+
+    access_token = kwargs['access_token']
+
     query = update.callback_query
     cart_id = query.message.chat_id
     if query.data == 'назад':
 
-        reply_markup = get_keyboard_main_menu()
+        reply_markup = get_keyboard_main_menu(access_token)
 
         context.bot.send_message(
             chat_id=query.message.chat_id,
@@ -176,7 +188,7 @@ def handle_description(update: Update, context: CallbackContext):
         )
         return 'HANDLE_MENU'
     elif query.data == 'корзина':
-        cart = get_cart(cart_id)
+        cart = get_cart(cart_id, access_token)
         message = get_cart_message(cart)
 
         keyboard = []
@@ -206,16 +218,19 @@ def handle_description(update: Update, context: CallbackContext):
         return "HANDLE_CART"
 
     quantity, product_id = query.data.split()
-    add_to_cart(int(quantity), product_id, cart_id)
+    add_to_cart(int(quantity), product_id, cart_id, access_token)
 
     return "HANDLE_DESCRIPTION"
 
 
-def handle_cart(update: Update, context: CallbackContext):
+def handle_cart(update: Update, context: CallbackContext, **kwargs):
+
+    access_token = kwargs['access_token']
+
     query = update.callback_query
     if query.data == 'меню':
 
-        reply_markup = get_keyboard_main_menu()
+        reply_markup = get_keyboard_main_menu(access_token)
 
         context.bot.send_message(
             chat_id=query.message.chat_id,
@@ -233,9 +248,9 @@ def handle_cart(update: Update, context: CallbackContext):
     cart_id = query.message.chat_id
     product_id = query.data
 
-    delete_from_cart(product_id, cart_id)
+    delete_from_cart(product_id, cart_id, access_token)
 
-    cart = get_cart(cart_id)
+    cart = get_cart(cart_id, access_token)
     message = get_cart_message(cart)
 
     keyboard = []
@@ -271,7 +286,10 @@ def handle_cart(update: Update, context: CallbackContext):
     return "HANDLE_CART"
 
 
-def handle_waiting_email(update: Update, context: CallbackContext):
+def handle_waiting_email(update: Update, context: CallbackContext, **kwargs):
+
+    access_token = kwargs['access_token']
+
     message = update.message
     customer_name = message.chat.first_name
     customer_email = message.text
@@ -280,7 +298,7 @@ def handle_waiting_email(update: Update, context: CallbackContext):
         text=f'Вы прислали: {customer_email}',
     )
     try:
-        create_a_customer(customer_name, customer_email)
+        create_a_customer(customer_name, customer_email, access_token)
     except requests.exceptions.HTTPError as err:
         if '422 Client Error' in str(err):
             context.bot.send_message(
@@ -291,7 +309,9 @@ def handle_waiting_email(update: Update, context: CallbackContext):
     return "WAITING_EMAIL"
 
 
-def handle_users_reply(update: Update, context: CallbackContext):
+def handle_users_reply(
+        update: Update, context: CallbackContext, access_token, client_id, client_secret, price_book_id,
+):
 
     db = get_database_connection()
     if update.message:
@@ -317,15 +337,15 @@ def handle_users_reply(update: Update, context: CallbackContext):
     state_handler = states_functions[user_state]
 
     try:
-        next_state = state_handler(update, context)
+        if time.time() > access_token['expires'] - 100:
+            access_token = get_access_token(client_id, client_secret)
+        next_state = state_handler(update, context, access_token=access_token, price_book_id=price_book_id)
         db.set(chat_id, next_state)
     except Exception as err:
         print(err)
 
 
-if __name__ == '__main__':
-    _database = None
-
+def main():
     env = Env()
     env.read_env()
 
@@ -334,12 +354,30 @@ if __name__ == '__main__':
     client_secret = env.str('CLIENT_SECRET')
     price_book_id = env.str('PRICE_BOOK_ID')
 
-    get_access_token(client_id, client_secret)
+    access_token = get_access_token(client_id, client_secret)
 
     updater = Updater(tg_token)
     dispatcher = updater.dispatcher
-    dispatcher.add_handler(CallbackQueryHandler(handle_users_reply))
-    dispatcher.add_handler(MessageHandler(Filters.text, handle_users_reply))
-    dispatcher.add_handler(CommandHandler('start', handle_users_reply))
+    dispatcher.add_handler(CallbackQueryHandler(lambda update, context: handle_users_reply(
+                                              update, context, access_token, client_id, client_secret, price_book_id,
+                                              )
+                                                )
+                           )
+    dispatcher.add_handler(MessageHandler(Filters.text,
+                                          lambda update, context: handle_users_reply(
+                                              update, context, access_token, client_id, client_secret, price_book_id,
+                                              )
+                                          )
+                           )
+    dispatcher.add_handler(CommandHandler('start', lambda update, context: handle_users_reply(
+                                              update, context, access_token, client_id, client_secret, price_book_id,
+                                              )
+                                          )
+                           )
     updater.start_polling()
     updater.idle()
+
+
+if __name__ == '__main__':
+    _database = None
+    main()
